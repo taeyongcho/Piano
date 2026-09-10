@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 같은 브랜치에 새로 푸시하면 진행 중이던 실행은 취소한다.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: 테스트 (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # 의존성이 없는 프로젝트라 설치 단계가 없다.
+      - name: 단위 테스트
+        run: npm test
+
+      # 단위 테스트는 브라우저 전용 모듈을 불러오지 않으므로 문법만 따로 확인한다.
+      - name: 전체 소스 문법 검사
+        run: |
+          shopt -s globstar
+          node --check server.mjs
+          for file in src/**/*.js test/**/*.mjs; do
+            echo "checking $file"
+            node --check "$file"
+          done
+        shell: bash

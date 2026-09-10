@@ -1,5 +1,7 @@
 # 🎹 피아노 연습실
 
+[![CI](https://github.com/taeyongcho/Piano/actions/workflows/ci.yml/badge.svg)](https://github.com/taeyongcho/Piano/actions/workflows/ci.yml)
+
 전자피아노를 USB로 컴퓨터에 연결해 놓고 쓰는 **웹 연습 프로그램**입니다.
 브라우저에서 바로 열리고, 설치할 것도 만들 것도(빌드도) 없습니다.
 
@@ -67,6 +69,9 @@ Safari · Firefox 에서는 MIDI 입력이 안 되지만, 컴퓨터 자판과 �
 ```bash
 npm test           # 음악 이론·연습 진행기 단위 테스트
 ```
+
+`main` 으로의 푸시와 모든 PR 에서 GitHub Actions 가 Node 20 · 22 로 단위 테스트를 돌리고,
+단위 테스트가 불러오지 않는 브라우저 전용 모듈까지 `node --check` 로 문법을 확인합니다.
 
 ```
 index.html          진입점

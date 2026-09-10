@@ -1,0 +1,12 @@
+{
+  "name": "piano-practice",
+  "version": "1.0.0",
+  "description": "전자피아노(USB MIDI)로 연습하는 웹 프로그램 — 악보 읽기, 음계, 화음, 청음, 핑거 연습",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": { "node": ">=18" }
+}

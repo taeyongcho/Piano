@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>피아노 연습실</title>
+  <meta name="description" content="전자피아노(USB MIDI)를 연결해 악보 읽기, 음계, 화음, 청음, 핑거 연습을 할 수 있는 웹 연습 프로그램" />
+  <meta name="color-scheme" content="dark light" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎹</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- 오선보의 음자리표 기호(U+1D11E 등)를 위한 글꼴. 없으면 시스템 글꼴로 대체된다. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <noscript>이 프로그램을 쓰려면 자바스크립트를 켜야 합니다.</noscript>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -8,6 +8,38 @@ const BLACK_W = 16;
 const BLACK_H = 84;
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+/**
+ * 건반 한 벌의 좌표를 계산한다. 화면 건반과 떨어지는 노트가 같은 좌표계를 써야
+ * 노트가 건반 바로 위로 떨어지므로, 이 함수를 둘이 공유한다.
+ * @returns {{low:number, high:number, width:number, height:number,
+ *            keys:Map<number,{x:number,width:number,black:boolean}>}}
+ */
+export function computeKeyLayout(lowInput, highInput) {
+  // 시작·끝이 흰건반이 되도록 살짝 넓힌다.
+  let low = lowInput;
+  let high = highInput;
+  while (isBlackKey(low) && low > 0) low--;
+  while (isBlackKey(high) && high < 127) high++;
+
+  const whites = [];
+  for (let m = low; m <= high; m++) if (!isBlackKey(m)) whites.push(m);
+  const whiteIndex = new Map(whites.map((m, i) => [m, i]));
+
+  const keys = new Map();
+  for (let m = low; m <= high; m++) {
+    if (isBlackKey(m)) {
+      // 바로 아래 흰건반의 오른쪽 경계에 걸치도록 놓는다.
+      let below = m - 1;
+      while (isBlackKey(below)) below--;
+      keys.set(m, { x: (whiteIndex.get(below) + 1) * WHITE_W - BLACK_W / 2, width: BLACK_W, black: true });
+    } else {
+      keys.set(m, { x: whiteIndex.get(m) * WHITE_W, width: WHITE_W - 1.5, black: false });
+    }
+  }
+
+  return { low, high, width: whites.length * WHITE_W, height: WHITE_H, keys };
+}
+
 export class PianoKeyboard {
   constructor(el, { low = 36, high = 96, onNoteOn, onNoteOff } = {}) {
     this.el = el;
@@ -34,17 +66,13 @@ export class PianoKeyboard {
     this.render();
   }
 
-  render() {
-    // 시작·끝이 흰건반이 되도록 살짝 넓힌다.
-    let low = this.low;
-    let high = this.high;
-    while (isBlackKey(low) && low > 0) low--;
-    while (isBlackKey(high) && high < 127) high++;
+  /** 지금 그려진 건반의 좌표계. 떨어지는 노트가 이 값을 그대로 쓴다. */
+  getLayout() { return this.layout; }
 
-    const whites = [];
-    for (let m = low; m <= high; m++) if (!isBlackKey(m)) whites.push(m);
-    const width = whites.length * WHITE_W;
-    const whiteIndex = new Map(whites.map((m, i) => [m, i]));
+  render() {
+    const layout = computeKeyLayout(this.low, this.high);
+    this.layout = layout;
+    const { low, high, width } = layout;
 
     const svg = document.createElementNS(SVG_NS, 'svg');
     svg.setAttribute('viewBox', `0 0 ${width} ${WHITE_H}`);
@@ -56,20 +84,11 @@ export class PianoKeyboard {
     const blackLayer = document.createElementNS(SVG_NS, 'g');
 
     for (let m = low; m <= high; m++) {
-      const black = isBlackKey(m);
+      const { x, width: keyWidth, black } = layout.keys.get(m);
       const rect = document.createElementNS(SVG_NS, 'rect');
-      let x;
-      if (black) {
-        // 바로 아래 흰건반의 오른쪽 경계에 걸치도록 놓는다.
-        let below = m - 1;
-        while (isBlackKey(below)) below--;
-        x = (whiteIndex.get(below) + 1) * WHITE_W - BLACK_W / 2;
-      } else {
-        x = whiteIndex.get(m) * WHITE_W;
-      }
       rect.setAttribute('x', x);
       rect.setAttribute('y', 0);
-      rect.setAttribute('width', black ? BLACK_W : WHITE_W - 1.5);
+      rect.setAttribute('width', keyWidth);
       rect.setAttribute('height', black ? BLACK_H : WHITE_H);
       rect.setAttribute('rx', black ? 2.5 : 3.5);
       rect.setAttribute('class', black ? 'key key-black' : 'key key-white');
@@ -78,10 +97,9 @@ export class PianoKeyboard {
       this.keys.set(m, rect);
 
       if (!black && this.labelStyle !== 'off') {
-        const showAll = this.labelStyle !== 'off';
-        if (showAll) {
+        {
           const text = document.createElementNS(SVG_NS, 'text');
-          text.setAttribute('x', x + (WHITE_W - 1.5) / 2);
+          text.setAttribute('x', x + keyWidth / 2);
           text.setAttribute('y', WHITE_H - 10);
           text.setAttribute('class', 'key-label');
           text.textContent = noteLabel(m, { style: this.labelStyle, withOctave: m % 12 === 0 });

@@ -4,7 +4,7 @@ import { h, panel, button } from '../ui.js';
 import { formatDuration } from '../stats.js';
 
 const MODE_NAMES = {
-  freeplay: '자유 연주', sightread: '악보 읽기', scales: '음계',
+  freeplay: '자유 연주', song: '곡 연습', sightread: '악보 읽기', scales: '음계',
   chords: '화음', fingers: '핑거 연습', ear: '청음', record: '기록',
 };
 

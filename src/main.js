@@ -8,6 +8,7 @@ import { Metronome, TapTempo } from './metronome.js';
 import { Stats } from './stats.js';
 
 import freeplay from './modes/freeplay.js';
+import song from './modes/song.js';
 import sightread from './modes/sightread.js';
 import scales from './modes/scales.js';
 import chords from './modes/chords.js';
@@ -15,7 +16,7 @@ import fingers from './modes/fingers.js';
 import ear from './modes/ear.js';
 import record from './modes/record.js';
 
-const MODES = [freeplay, sightread, scales, chords, fingers, ear, record];
+const MODES = [freeplay, song, sightread, scales, chords, fingers, ear, record];
 
 const SETTINGS_KEY = 'piano.settings.v1';
 const defaults = {
@@ -52,7 +53,7 @@ metronome.beatsPerBar = settings.beatsPerBar;
 const app = document.getElementById('app');
 const statusEl = h('span', { class: 'status status-idle' }, 'MIDI 연결 안 됨');
 const deviceSelectWrap = h('span', { class: 'device-wrap' });
-const connectBtn = button('전자피아노 연결', connect, { variant: 'primary' });
+const connectBtn = button('전자피아노 연결', connect, { variant: 'primary btn-connect' });
 const beatDot = h('span', { class: 'beat-dot' });
 const bpmLabel = h('span', { class: 'bpm-label' }, String(settings.bpm));
 const modeHint = h('p', { class: 'mode-hint' });
@@ -268,13 +269,16 @@ mountMode(location.hash.slice(1) || MODES[0].id);
 renderStatus(input.supported ? 'idle' : 'unsupported');
 
 // 첫 사용자 동작에서 오디오를 깨우고, 가능하면 MIDI도 자동으로 붙인다.
+// pointerdown 이 아니라 click 에서 처리한다. 연결을 시작하면 상단 바 글자가 바뀌면서
+// 좁은 화면에서는 줄바꿈이 달라져 그 아래가 밀리는데, pointerdown 에서 하면 그 사이에
+// 눌린 자리의 요소가 바뀌어 첫 클릭이 통째로 무시된다.
 const wake = () => {
   synth.ensure();
   if (input.supported && input.status === 'idle') connect();
-  window.removeEventListener('pointerdown', wake);
+  window.removeEventListener('click', wake);
   window.removeEventListener('keydown', wake);
 };
-window.addEventListener('pointerdown', wake);
+window.addEventListener('click', wake);
 window.addEventListener('keydown', wake);
 
 // 스페이스바로 메트로놈을 켜고 끈다.
